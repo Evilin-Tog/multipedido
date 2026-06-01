@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIL - Distribuição por Promotor</title>
+    <title>LIS - Distribuição por Promotor</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -97,10 +97,58 @@
         .inventory-tab p { margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-main); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .inventory-tab strong { font-size: 0.85rem; color: var(--success); margin-top: 2px;}
 
+        /* ÁREA DO BOTÃO SUPERIOR DE CALCULAR FRETE + ADICIONAL DO RESUMO GLOBAL */
+        .calculation-trigger-zone {
+            max-width: 1600px;
+            margin: 20px auto 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .global-freight-indicator {
+            background: var(--primary-light);
+            border: 1px solid rgba(0, 75, 141, 0.15);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .global-freight-indicator strong { color: var(--primary); font-size: 1rem; }
+        .global-freight-breakdown { color: var(--text-sub); font-size: 0.8rem; font-weight: 500; border-left: 2px solid var(--border); padding-left: 15px; }
+
+        .btn-calc-trigger {
+            background: linear-gradient(135deg, var(--primary), var(--dark-blue));
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,75,141,0.25);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .btn-calc-trigger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,75,141,0.35);
+        }
+
         .container {
             max-width: 1600px;
             margin: 0 auto;
-            padding: 25px;
+            padding: 15px 25px 25px 25px;
         }
 
         /* GRID / CARDS DE DISTRIBUIÇÃO */
@@ -115,7 +163,7 @@
             border-radius: 16px;
             border: 1px solid var(--border);
             display: grid;
-            grid-template-columns: 320px 1fr 280px;
+            grid-template-columns: 320px 1fr 300px;
             overflow: hidden;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
@@ -124,7 +172,6 @@
         .allocation-card:hover {
             border-color: #cbd5e1;
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-            transform: translateY(-2px);
         }
 
         /* COLUNA 1: Perfil Avançado do Promotor */
@@ -155,25 +202,40 @@
         .promoter-code { font-size: 0.75rem; color: white; background: var(--dark-blue); padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px; }
         
         .promoter-details-block {
-            margin-top: 15px;
+            margin-top: 12px;
             border-top: 1px dashed var(--border);
-            padding-top: 15px;
+            padding-top: 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .detail-item { font-size: 0.75rem; color: var(--text-sub); line-height: 1.4; }
         .detail-item strong { color: var(--text-main); }
 
-        /* COLUNA 2: Grid de Entrada de Materiais */
+        /* BOX DE TOTAIS DINÂMICOS (PESO E VALOR CORRIGIDOS) */
+        .dynamic-totals-box {
+            margin-top: 10px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .total-row-lbl { font-size: 0.72rem; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .total-row-lbl strong { color: var(--primary); }
+
+        /* COLUNA 2: Grid Horizontal de Entrada de Materiais */
         .materials-input-pool {
             padding: 24px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            display: flex;
+            gap: 14px;
             background: #ffffff;
-            align-content: center;
+            overflow-x: auto;
+            align-items: center;
+            scrollbar-width: thin;
         }
 
         .material-input-box {
@@ -185,6 +247,7 @@
             flex-direction: column;
             justify-content: space-between;
             height: 98px;
+            flex: 0 0 175px;
             transition: all 0.2s;
         }
 
@@ -242,6 +305,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
         }
 
         .shipping-title {
@@ -251,6 +315,21 @@
             text-transform: uppercase;
             margin-bottom: 10px;
             letter-spacing: 0.5px;
+        }
+
+        /* ESTADO BLOQUEADO DO FRETE */
+        .shipping-locked-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.75rem;
+            padding: 20px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            background: #f1f5f9;
         }
 
         .shipping-options-group {
@@ -327,19 +406,11 @@
         .btn-success { background: var(--success); color: white; box-shadow: 0 4px 14px rgba(16,185,129,0.3); }
         .btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
 
-        /* RESPONSIVIDADE COMPACTA */
-        @media (max-width: 1400px) {
-            .materials-input-pool { grid-template-columns: repeat(3, 1fr); }
-            .allocation-card { grid-template-columns: 280px 1fr 260px; }
-        }
-        @media (max-width: 1100px) {
+        @media (max-width: 1200px) {
+            .calculation-trigger-zone { flex-direction: column; align-items: flex-end; }
             .allocation-card { grid-template-columns: 1fr; }
             .promoter-profile-side { border-right: none; border-bottom: 1px solid var(--border); }
-            .materials-input-pool { grid-template-columns: repeat(4, 1fr); }
             .shipping-side { border-left: none; border-top: 1px solid var(--border); }
-        }
-        @media (max-width: 768px) {
-            .materials-input-pool { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -347,11 +418,12 @@
 
 <header>
     <div class="header-title">
-        <h1>LIS | PEDIDOS</h1>
+        <h1>LIS | Pedidos</h1>
         <p>Painel de Distribuição de Materiais por Promotores Vinculados</p>
     </div>
     <div class="meta-badges">
-
+        <div class="meta-badge"><span>Dep:</span> Trade Marketing</div>
+        <div class="meta-badge"><span>Canal:</span> Engenharia / Varejo</div>
     </div>
 </header>
 
@@ -361,6 +433,17 @@
     </div>
     </div>
 
+<div class="calculation-trigger-zone">
+    <div class="global-freight-indicator" id="globalFreightSummary" style="display: none;">
+        <span>Total Frete Selecionado: <strong id="global-freight-total">R$ 0,00</strong></span>
+        <span class="global-freight-breakdown" id="global-freight-counts">00 Rodoviário — 00 Retira</span>
+    </div>
+    <div style="flex-grow: 1; display: block;" id="spacer-zone"></div>
+    <button class="btn-calc-trigger" onclick="calcularFreteETotaisGlobal()">
+        ⚙️ Calcular Frete e Peso das Cargas
+    </button>
+</div>
+
 <div class="container">
     <div class="allocation-list" id="promotersContainer">
         </div>
@@ -369,37 +452,34 @@
 <div class="footer-action">
     <button class="btn btn-secondary">Voltar ao Catálogo</button>
     <div style="display: flex; gap: 12px;">
-        <button class="btn btn-secondary" onclick="document.querySelectorAll('input[type=number]').forEach(i => i.value=''); updateReservedBalances();">Limpar Quantidades</button>
+        <button class="btn btn-secondary" onclick="resetFormulario()">Limpar Quantidades</button>
         <button class="btn btn-success">Confirmar e Emitir Distribuição</button>
     </div>
 </div>
 
 <script>
-    // Configuração dos 08 itens com SKU, Descrição, Departamento e Canal vinculados
     const itensCatalogo = [
-        { sku: "HALMMK0001", descricao: "Cabo Flexível 1.5mm", qtdSelecionada: 500, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0002", descricao: "Cabo Flexível 2.5mm", qtdSelecionada: 350, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0003", descricao: "Disjuntor DIN 20A", qtdSelecionada: 120, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0004", descricao: "Fita Isolante Preta 20m", qtdSelecionada: 200, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0005", descricao: "Conector Emenda Tipo T", qtdSelecionada: 85, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0006", descricao: "Canaleta Plástica 2m", qtdSelecionada: 60, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0007", descricao: "Kit Parafusos Philips", qtdSelecionada: 1000, departamento: "Shopper", canal: "10100" },
-        { sku: "HALMMK0008", descricao: "Fita Auto-Fusão 10m", qtdSelecionada: 150, departamento: "Shopper", canal: "10100" }
+        { sku: "SIL-001", descricao: "Cabo Flexível 1.5mm", qtdSelecionada: 500, departamento: "Shopper", canal: "10100", pesoUnitario: 0.03, precoUnitario: 4.50 },
+        { sku: "SIL-002", descricao: "Cabo Flexível 2.5mm", qtdSelecionada: 350, departamento: "Shopper", canal: "10100", pesoUnitario: 0.05, precoUnitario: 6.80 },
+        { sku: "SIL-003", descricao: "Disjuntor DIN 20A", qtdSelecionada: 120, departamento: "Shopper", canal: "10100", pesoUnitario: 0.12, precoUnitario: 18.90 },
+        { sku: "SIL-004", descricao: "Fita Isolante Preta 20m", qtdSelecionada: 200, departamento: "Shopper", canal: "10100", pesoUnitario: 0.08, precoUnitario: 5.20 },
+        { sku: "SIL-005", descricao: "Conector Emenda Tipo T", qtdSelecionada: 85, departamento: "Shopper", canal: "10100", pesoUnitario: 0.02, precoUnitario: 2.10 },
+        { sku: "SIL-006", descricao: "Canaleta Plástica 2m", qtdSelecionada: 60, departamento: "Shopper", canal: "10100", pesoUnitario: 0.45, precoUnitario: 12.40 },
+        { sku: "SIL-007", descricao: "Kit Parafusos Philips", qtdSelecionada: 1000, departamento: "Shopper", canal: "10100", pesoUnitario: 0.01, precoUnitario: 0.80 },
+        { sku: "SIL-008", descricao: "Fita Auto-Fusão 10m", qtdSelecionada: 150, departamento: "Shopper", canal: "10100", pesoUnitario: 0.09, precoUnitario: 14.20 }
     ];
 
-    // Configuração dos 08 promotores vinculados estruturados conforme regra solicitada
     const promotores = [
-        { nome: "Carlos Alberto Moura", codPromotor: "0881", baseEnvio: "Base São Paulo", codBase: "101010", endereco: "Av. Paulista, 1000 - Bela Vista, São Paulo/SP" },
-        { nome: "Ana Paula Oliveira", codPromotor: "0882", baseEnvio: "Base São Paulo", codBase: "202020", endereco: "Rua Augusta, 450 - Consolação, São Paulo/SP" },
-        { nome: "Marcos Vinícius", codPromotor: "0883", baseEnvio: "Base Rio de Janeiro", codBase: "30303", endereco: "Av. Atlântica, 1500 - Copacabana, Rio de Janeiro/RJ" },
-        { nome: "Fernanda Lima", codPromotor: "0884", baseEnvio: "Base Campinas", codBase: "404040", endereco: "Av. Francisco Glicério, 820 - Centro, Campinas/SP" },
-        { nome: "Ricardo Santos", codPromotor: "0885", baseEnvio: "Base São Paulo", codBase: "505050", endereco: "Av. Cruzeiro do Sul, 2200 - Santana, São Paulo/SP" },
-        { nome: "Juliana Costa", codPromotor: "0886", baseEnvio: "Base Belo Horizonte", codBase: "606060", endereco: "Av. Afonso Pena, 3000 - Cruzeiro, Belo Horizonte/MG" },
-        { nome: "Gabriel Vignoli", codPromotor: "0887", baseEnvio: "Base São Paulo", codBase: "707070", endereco: "Rua Domingos de Morais, 1200 - Vila Mariana, São Paulo/SP" },
-        { nome: "Beatriz Souza", codPromotor: "0888", baseEnvio: "Base Curitiba", codBase: "808080", endereco: "Rua XV de Novembro, 600 - Centro, Curitiba/PR" }
+        { nome: "Carlos Alberto Moura", codPromotor: "PM0881", baseEnvio: "Base São Paulo", codBase: "BSP-01", endereco: "Av. Paulista, 1000 - Bela Vista, São Paulo/SP" },
+        { nome: "Ana Paula Oliveira", codPromotor: "PM0882", baseEnvio: "Base São Paulo", codBase: "BSP-01", endereco: "Rua Augusta, 450 - Consolação, São Paulo/SP" },
+        { nome: "Marcos Vinícius", codPromotor: "PM0883", baseEnvio: "Base Rio de Janeiro", codBase: "BRJ-02", endereco: "Av. Atlântica, 1500 - Copacabana, Rio de Janeiro/RJ" },
+        { nome: "Fernanda Lima", codPromotor: "PM0884", baseEnvio: "Base Campinas", codBase: "BCP-03", endereco: "Av. Francisco Glicério, 820 - Centro, Campinas/SP" },
+        { nome: "Ricardo Santos", codPromotor: "PM0885", baseEnvio: "Base São Paulo", codBase: "BSP-01", endereco: "Av. Cruzeiro do Sul, 2200 - Santana, São Paulo/SP" },
+        { nome: "Juliana Costa", codPromotor: "PM0886", baseEnvio: "Base Belo Horizonte", codBase: "BBH-04", endereco: "Av. Afonso Pena, 3000 - Cruzeiro, Belo Horizonte/MG" },
+        { nome: "Gabriel Vignoli", codPromotor: "PM0887", baseEnvio: "Base São Paulo", codBase: "BSP-01", endereco: "Rua Domingos de Morais, 1200 - Vila Mariana, São Paulo/SP" },
+        { nome: "Beatriz Souza", codPromotor: "PM0888", baseEnvio: "Base Curitiba", codBase: "BCT-05", endereco: "Rua XV de Novembro, 600 - Centro, Curitiba/PR" }
     ];
 
-    // Renderiza a barra fixa superior de resumo do catálogo com Saldo Total e Indicador de Reserva
     const inventoryBar = document.getElementById('inventoryBar');
     itensCatalogo.forEach((item, iIndex) => {
         inventoryBar.innerHTML += `
@@ -417,14 +497,11 @@
         `;
     });
 
-    // Renderiza a lista de distribuição
     const container = document.getElementById('promotersContainer');
-
     promotores.forEach((p, pIndex) => {
         const card = document.createElement('div');
         card.className = 'allocation-card';
 
-        // COLUNA 1: Informações formatadas do Promotor
         let colPromotor = `
             <div class="promoter-profile-side">
                 <div>
@@ -439,11 +516,24 @@
                 <div class="promoter-details-block">
                     <div class="detail-item"><strong>Base:</strong> ${p.baseEnvio} (${p.codBase})</div>
                     <div class="detail-item"><strong>Destino:</strong> ${p.endereco}</div>
+                    
+                    <div class="dynamic-totals-box" id="logistic-totals-${pIndex}" style="display: none;">
+                        <div class="total-row-lbl">
+                            <span>Peso Total:</span> 
+                            <span><strong id="peso-val-${pIndex}">0.00</strong>kg</span>
+                        </div>
+                        <div class="total-row-lbl">
+                            <span>Valor Itens:</span> 
+                            <strong id="preco-val-${pIndex}">R$ 0,00</strong>
+                        </div>
+                        <div style="font-size: 0.65rem; color: #0284c7; font-weight: 700; margin-top: 6px; border-top: 1px dashed var(--border); padding-top: 6px; text-transform: uppercase;">
+                            Veículo sugerido: Carro de passeio
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
 
-        // COLUNA 2: Grid com os 8 inputs com SKU, descrição, departamento e canal
         let colMateriais = `<div class="materials-input-pool">`;
         itensCatalogo.forEach((item, iIndex) => {
             colMateriais += `
@@ -463,34 +553,36 @@
         });
         colMateriais += `</div>`;
 
-        // COLUNA 3: Opções de frete exclusivas por linha
         let colFrete = `
-            <div class="shipping-side">
+            <div class="shipping-side" id="shipping-side-${pIndex}">
                 <span class="shipping-title">Opção de Envio</span>
-                <div class="shipping-options-group">
-                    <label class="shipping-method selected" onclick="selectShipping(this)">
-                        <input type="radio" name="ship_${pIndex}" checked>
+                <div class="shipping-locked-state" id="ship-locked-${pIndex}">
+                    <span>Insira as quantidades e clique em <strong>Calcular Frete</strong> acima.</span>
+                </div>
+                <div class="shipping-options-group" id="ship-options-${pIndex}" style="display: none;">
+                    <label class="shipping-method selected" onclick="selectShipping(this, ${pIndex})">
+                        <input type="radio" name="ship_${pIndex}" value="24.90" data-type="rodoviario" checked>
                         <div class="ship-info">
-                            <span class="ship-name">RETIRA</span>
-                            <span class="ship-eta">Previsão: 11/11/2000</span>
+                            <span class="ship-name">Rodoviário</span>
+                            <span class="ship-eta">Previsão: 2 dias úteis</span>
                         </div>
                         <span class="ship-price">R$ 24,90</span>
                     </label>
-                    <label class="shipping-method" onclick="selectShipping(this)">
-                        <input type="radio" name="ship_${pIndex}">
+                    <label class="shipping-method" onclick="selectShipping(this, ${pIndex})">
+                        <input type="radio" name="ship_${pIndex}" value="48.00" data-type="retira">
                         <div class="ship-info">
-                            <span class="ship-name">DEDICADO</span>
-                            <span class="ship-eta">Previsão: 11/11/2000</span>
+                            <span class="ship-name">Retira</span>
+                            <span class="ship-eta">Previsão: 1 dia útil</span>
                         </div>
                         <span class="ship-price">R$ 48,00</span>
                     </label>
-                    <label class="shipping-method" onclick="selectShipping(this)">
-                        <input type="radio" name="ship_${pIndex}">
+                    <label class="shipping-method" onclick="selectShipping(this, ${pIndex})">
+                        <input type="radio" name="ship_${pIndex}" value="150.00" data-type="dedicado">
                         <div class="ship-info">
-                            <span class="ship-name">Rodoviario</span>
-                            <span class="ship-eta">11/11/2000</span>
+                            <span class="ship-name">Dedicado</span>
+                            <span class="ship-eta">Previsão: até 4h</span>
                         </div>
-                        <span class="ship-price" style="color:var(--success)"></span>
+                        <span class="ship-price">R$ 150,00</span>
                     </label>
                 </div>
             </div>
@@ -500,47 +592,135 @@
         container.appendChild(card);
     });
 
-    // Função visual para alternar a seleção do frete de forma amigável
-    function selectShipping(element) {
+    function selectShipping(element, pIndex) {
         const siblings = element.parentNode.querySelectorAll('.shipping-method');
         siblings.forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
         element.querySelector('input[type="radio"]').checked = true;
+        
+        // Atualiza o resumo superior instantaneamente se o frete for modificado
+        updateGlobalFreightSummary();
     }
 
-    // FUNÇÃO INOVADORA: Atualiza os saldos reservados em tempo real
     function updateReservedBalances() {
         itensCatalogo.forEach((item, iIndex) => {
             let totalReservado = 0;
-            // Captura todos os inputs referentes àquele produto específico nas linhas dos promotores
             const inputs = document.querySelectorAll(`input[data-item="${iIndex}"]`);
             inputs.forEach(input => {
                 totalReservado += parseInt(input.value) || 0;
             });
 
-            // Atualiza o indicador "RES" correspondente no painel superior fixo
             const badgeReserva = document.getElementById(`res-${iIndex}`);
             if (badgeReserva) {
                 badgeReserva.innerText = totalReservado;
-                
-                // Feedback visual de aviso se estourar o limite do catálogo
                 if (totalReservado > item.qtdSelecionada) {
-                    badgeReserva.style.color = '#ef4444'; // Alerta Vermelho
+                    badgeReserva.style.color = '#ef4444';
                 } else if (totalReservado > 0) {
-                    badgeReserva.style.color = '#f59e0b'; // Alerta Laranja (Em uso)
+                    badgeReserva.style.color = '#f59e0b';
                 } else {
-                    badgeReserva.style.color = 'var(--primary)'; // Padrão
+                    badgeReserva.style.color = 'var(--primary)';
                 }
             }
         });
     }
 
-    // Escuta qualquer digitação dentro do container dos promotores de forma global
     document.getElementById('promotersContainer').addEventListener('input', function(e) {
         if (e.target.matches('input[type="number"]')) {
             updateReservedBalances();
         }
     });
+
+    // SISTEMA LOGÍSTICO COMPLETO: Calcula pesos individuais e consolida resumo de fretes superior
+    function updateGlobalFreightSummary() {
+        let totalFreteGeral = 0;
+        let countRodoviario = 0;
+        let countRetira = 0;
+        let countDedicado = 0;
+        let temCalculoAtivo = false;
+
+        promotores.forEach((_, pIndex) => {
+            const viewOpcoesFrete = document.getElementById(`ship-options-${pIndex}`);
+            // Só computa frete se o bloco estiver ativo/visível (promotor recebeu carga)
+            if (viewOpcoesFrete && viewOpcoesFrete.style.display === 'flex') {
+                temCalculoAtivo = true;
+                const radios = document.getElementsByName(`ship_${pIndex}`);
+                radios.forEach(radio => {
+                    if (radio.checked) {
+                        totalFreteGeral += parseFloat(radio.value);
+                        const tipo = radio.getAttribute('data-type');
+                        if (tipo === 'rodoviario') countRodoviario++;
+                        if (tipo === 'retira') countRetira++;
+                        if (tipo === 'dedicado') countDedicado++;
+                    }
+                });
+            }
+        });
+
+        const infoBox = document.getElementById('globalFreightSummary');
+        if (temCalculoAtivo) {
+            document.getElementById('global-freight-total').innerText = totalFreteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            let breakdownText = `${String(countRodoviario).padStart(2, '0')} Rodoviário — ${String(countRetira).padStart(2, '0')} Retira`;
+            if (countDedicado > 0) {
+                breakdownText += ` — ${String(countDedicado).padStart(2, '0')} Dedicado`;
+            }
+            document.getElementById('global-freight-counts').innerText = breakdownText;
+            infoBox.style.display = 'flex';
+        } else {
+            infoBox.style.display = 'none';
+        }
+    }
+
+    function calcularFreteETotaisGlobal() {
+        promotores.forEach((p, pIndex) => {
+            let pesoTotalPromotor = 0;
+            let valorTotalPromotor = 0;
+            let temItens = false;
+
+            itensCatalogo.forEach((item, iIndex) => {
+                const inputElement = document.querySelector(`input[data-promoter="${pIndex}"][data-item="${iIndex}"]`);
+                const qtd = parseInt(inputElement.value) || 0;
+
+                if (qtd > 0) {
+                    pesoTotalPromotor += (qtd * item.pesoUnitario);
+                    valorTotalPromotor += (qtd * item.precoUnitario);
+                    temItens = true;
+                }
+            });
+
+            const boxTotais = document.getElementById(`logistic-totals-${pIndex}`);
+            const txtPeso = document.getElementById(`peso-val-${pIndex}`);
+            const txtPreco = document.getElementById(`preco-val-${pIndex}`);
+            const viewBloqueado = document.getElementById(`ship-locked-${pIndex}`);
+            const viewOpcoesFrete = document.getElementById(`ship-options-${pIndex}`);
+
+            if (temItens) {
+                txtPeso.innerText = pesoTotalPromotor.toFixed(2);
+                txtPreco.innerText = valorTotalPromotor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                boxTotais.style.display = 'flex';
+                viewBloqueado.style.display = 'none';
+                viewOpcoesFrete.style.display = 'flex';
+            } else {
+                boxTotais.style.display = 'none';
+                viewBloqueado.style.display = 'flex';
+                viewOpcoesFrete.style.display = 'none';
+            }
+        });
+
+        // Executa a consolidação final no topo
+        updateGlobalFreightSummary();
+    }
+
+    function resetFormulario() {
+        document.querySelectorAll('input[type=number]').forEach(i => i.value = '');
+        updateReservedBalances();
+        promotores.forEach((_, pIndex) => {
+            document.getElementById(`logistic-totals-${pIndex}`).style.display = 'none';
+            document.getElementById(`ship-locked-${pIndex}`).style.display = 'flex';
+            document.getElementById(`ship-options-${pIndex}`).style.display = 'none';
+        });
+        updateGlobalFreightSummary();
+    }
 </script>
 
 </body>
